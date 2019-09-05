@@ -7,8 +7,7 @@ var http = require('http'),
 var listingData, server;
 
 var requestHandler = function(request, response) {
-  var parsedUrl = url.parse(request.url);
-
+  var parsedUrl = url.parse(request.url).pathname;
   /*
     Your request handler should send listingData in the JSON format as a response if a GET request 
     is sent to the '/listings' path. Otherwise, it should send a 404 error. 
@@ -23,7 +22,18 @@ var requestHandler = function(request, response) {
     
     HINT: Explore the list of MIME Types
     https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Complete_list_of_MIME_types
-   */
+  */
+    if(parsedUrl == '/listings') {
+        console.log('Sending json listings');
+        response.writeHead(200, {'Content-Type': 'application/json'});
+        response.write(listingData);
+    }
+    else {
+        console.log('Sending 404 error');
+        response.writeHead(404, {'Content-Type': 'text/plain'});
+        response.write('Bad gateway error');
+    }
+    response.end();
 };
 
 fs.readFile('listings.json', 'utf8', function(err, data) {
@@ -38,14 +48,17 @@ fs.readFile('listings.json', 'utf8', function(err, data) {
    */
 
     //Check for errors
-  
 
-   //Save the sate in the listingData variable already defined
-  
+    if (err) throw err;
 
-  //Creates the server
-  
-  //Start the server
+   //Save the state in the listingData variable already defined
+    listingData = data;
 
+    //Creates the server
+    server = http.createServer(requestHandler);
+    //Start the server
+    server.listen(port, function() {
+        console.log('Server started. Listening on: http://127.0.0.1:' + port);
+    });
 
 });
